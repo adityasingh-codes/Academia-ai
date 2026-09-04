@@ -1,16 +1,88 @@
 import asyncio
+import logging
 from pathlib import Path
+from typing import Any
 from uuid import UUID
 
 from openai import APIError, APITimeoutError, AsyncOpenAI, RateLimitError
-from pydantic import BaseModel, ConfigDict, Field, ValidationError
+from pydantic import BaseModel, ConfigDict, Field, TypeAdapter, ValidationError
 from pypdf import PdfReader
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.models import NodeStatus, NodeType, SyllabusNode
 from app.core.config import get_settings
+from app.schemas.diagnostic_schema import KnowledgeGraphPayload
 
 MAX_SOURCE_CHARS = 300_000
+logger = logging.getLogger(__name__)
+
+
+class SyllabusParserService:
+    """Convert uploaded material chunks into a validated learning knowledge graph."""
+
+    def __init__(self, client: Any | None = None, model: str = "gpt-4o-mini") -> None:
+        self.settings = get_settings()
+        self.client = client
+        self.model = model
+
+    def _client(self) -> Any:
+        if self.client is not None:
+            return self.client
+        if not self.settings.openai_api_key:
+            raise RuntimeError("OPENAI_API_KEY is required for knowledge graph extraction")
+        from openai import OpenAI
+
+        self.client = OpenAI(api_key=self.settings.openai_api_key)
+        return self.client
+
+    @staticmethod
+    def _format_chunks(document_chunks: list[dict]) -> str:
+        if not document_chunks:
+            raise ValueError("document_chunks must contain at least one chunk")
+        formatted = []
+        for index, chunk in enumerate(document_chunks, 1):
+            content = str(chunk.get("content") or chunk.get("text") or "").strip()
+            if not content:
+                continue
+            page = chunk.get("page_number", "unknown")
+            formatted.append(f"[CHUNK {index} | PAGE {page}]\n{content}")
+        if not formatted:
+            raise ValueError("document_chunks contain no usable text")
+        return "\n\n".join(formatted)
+
+    def extract_knowledge_graph(self, document_chunks: list[dict], document_id: str) -> KnowledgeGraphPayload:
+        if not document_id.strip():
+            raise ValueError("document_id must not be empty")
+        source = self._format_chunks(document_chunks)
+        prompt = (
+            "Parse the supplied educational material into a domain-agnostic knowledge graph. "
+            "Return one JSON object only. Build Chapter -> Topic -> Subtopic hierarchy, preserve page references, "
+            "identify implicit prerequisite concepts when the source supports them, and create dependency links "
+            "from prerequisite source_node_id to dependent target_node_id. For every Subtopic, generate at least "
+            "two useful flashcard_candidates and one quiz_candidate_seeds entry. Keep summaries concise and ground "
+            "all content in the source. Use stable node ids such as node_algebra_functions.\n\n"
+            f"DOCUMENT_ID: {document_id}\nSOURCE:\n{source}"
+        )
+        try:
+            response = self._client().chat.completions.create(
+                model=self.model,
+                messages=[
+                    {"role": "system", "content": "You are a precise curriculum architect producing safe JSON for a learning engine."},
+                    {"role": "user", "content": prompt},
+                ],
+                response_format={"type": "json_object"},
+                temperature=0,
+            )
+            raw_content = response.choices[0].message.content
+            if not raw_content:
+                raise ValueError("LLM returned an empty knowledge graph")
+            payload = TypeAdapter(KnowledgeGraphPayload).validate_json(raw_content)
+            if payload.document_id != document_id:
+                payload = payload.model_copy(update={"document_id": document_id})
+            return payload
+        except (APIError, APITimeoutError, RateLimitError, ValidationError, ValueError, TypeError) as exc:
+            logger.exception("Knowledge graph extraction failed for document %s", document_id)
+            raise ValueError("LLM returned an invalid knowledge graph") from exc
 
 
 class StrictModel(BaseModel):

@@ -1,11 +1,60 @@
 from collections import deque
+import logging
 from typing import Any
 from uuid import UUID
 
+import networkx as nx
 from sqlalchemy import func, or_, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.schemas.diagnostic_schema import KnowledgeGraphPayload
 from app.models.models import NodeStatus, SessionLog, SyllabusNode
+
+logger = logging.getLogger(__name__)
+
+
+class PrerequisiteTracerService:
+    """Build cycle-safe remediation sequences from an LLM-generated knowledge graph."""
+
+    def build_learning_path(self, graph_payload: KnowledgeGraphPayload, weak_node_ids: list[str]) -> list[str]:
+        graph = nx.DiGraph()
+        graph.add_nodes_from(node.node_id for node in graph_payload.nodes)
+        graph.add_edges_from((link.source_node_id, link.target_node_id) for link in graph_payload.links)
+
+        known_ids = set(graph.nodes)
+        weak_ids = list(dict.fromkeys(node_id for node_id in weak_node_ids if node_id in known_ids))
+        missing_ids = sorted(set(weak_node_ids) - known_ids)
+        if missing_ids:
+            logger.warning("Ignoring unknown weak node ids: %s", missing_ids)
+        if not weak_ids:
+            return []
+
+        relevant_ids = set(weak_ids)
+        for node_id in weak_ids:
+            relevant_ids.update(nx.ancestors(graph, node_id))
+        learning_graph = graph.subgraph(relevant_ids).copy()
+        self._resolve_cycles(learning_graph)
+
+        try:
+            ordered = list(nx.topological_sort(learning_graph))
+        except nx.NetworkXUnfeasible:
+            logger.warning("Unable to topologically sort prerequisite graph; resolving remaining cycle")
+            self._resolve_cycles(learning_graph)
+            ordered = list(nx.topological_sort(learning_graph))
+        return ordered
+
+    @staticmethod
+    def _resolve_cycles(graph: nx.DiGraph) -> None:
+        """Remove one deterministic edge per detected cycle until the graph is acyclic."""
+        while True:
+            try:
+                cycle = nx.find_cycle(graph, orientation="original")
+            except nx.NetworkXNoCycle:
+                return
+            cycle_edges = [(source, target) for source, target, _ in cycle]
+            source, target = sorted(cycle_edges, key=lambda edge: (edge[0], edge[1]))[-1]
+            graph.remove_edge(source, target)
+            logger.warning("Removed cyclic prerequisite link %s -> %s", source, target)
 
 
 async def fetch_prerequisite_graph(db_session: AsyncSession, target_node_id: UUID, max_depth: int = 4) -> dict[str, Any]:
