@@ -1,0 +1,3 @@
+import { BookOpen, Brain, Target } from "lucide-react";
+import { WorkspaceView } from "../WorkspaceView";
+export default function MistakeLibraryCalibration() { return <WorkspaceView eyebrow="Error intelligence" title="Mistake Library Calibration" description="Review recurring error patterns and tune future questions to target conceptual, procedural, and transfer gaps." icon={Brain} accent="rose" metrics={[{ label: "Logged mistakes", value: "63", note: "Across 9 assessments", icon: BookOpen }, { label: "Conceptual", value: "41%", note: "Primary pattern", icon: Brain }, { label: "Calibrated tags", value: "28", note: "Ready for generation", icon: Target }]} />; }

@@ -1,0 +1,3 @@
+import { CalendarDays, Clock3, Target } from "lucide-react";
+import { WorkspaceView } from "../WorkspaceView";
+export default function TimeAwarePlanner() { return <WorkspaceView eyebrow="Planning studio" title="Time-Aware Planner" description="Build realistic study blocks around your available time, energy, deadlines, and prerequisite order." icon={CalendarDays} accent="indigo" metrics={[{ label: "Available today", value: "74 min", note: "2 focused windows", icon: Clock3 }, { label: "Plan completion", value: "91%", note: "Past 14 days", icon: Target }, { label: "Deadline buffer", value: "6 days", note: "Ahead of schedule", icon: CalendarDays }]} />; }

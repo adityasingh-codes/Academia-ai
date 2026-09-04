@@ -1,0 +1,3 @@
+import { Brain, Library, Target } from "lucide-react";
+import { WorkspaceView } from "../WorkspaceView";
+export default function KnowledgeGraphVisualizer() { return <WorkspaceView eyebrow="Concept map" title="Knowledge Graph Visualizer" description="Explore how chapters, topics, and prerequisite concepts connect across your indexed materials." icon={Library} accent="cyan" metrics={[{ label: "Nodes indexed", value: "428", note: "Across 14 documents", icon: Library }, { label: "Dependencies", value: "691", note: "Validated links", icon: Brain }, { label: "Focus cluster", value: "Calculus", note: "5 concepts in queue", icon: Target }]} />; }

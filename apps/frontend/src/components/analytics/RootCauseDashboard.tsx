@@ -1,0 +1,3 @@
+import { BarChart3, Target, TrendingDown } from "lucide-react";
+import { WorkspaceView } from "../WorkspaceView";
+export default function RootCauseDashboard() { return <WorkspaceView eyebrow="Diagnostic analytics" title="Root Cause Dashboard" description="Trace visible mistakes back through the prerequisite graph and focus revision where it has the highest leverage." icon={BarChart3} accent="rose" metrics={[{ label: "Weak concepts", value: "7", note: "2 newly detected", icon: TrendingDown }, { label: "Root causes", value: "3", note: "Across 2 subjects", icon: Target }, { label: "Recovery rate", value: "64%", note: "+12% after remediation", icon: BarChart3 }]} />; }

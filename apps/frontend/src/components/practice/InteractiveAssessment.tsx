@@ -1,0 +1,3 @@
+import { Brain, CheckCircle2, Target } from "lucide-react";
+import { WorkspaceView } from "../WorkspaceView";
+export default function InteractiveAssessment() { return <WorkspaceView eyebrow="Practice lab" title="Interactive Assessment" description="Work through adaptive questions that respond to your confidence, errors, and reasoning path." icon={Target} accent="indigo" metrics={[{ label: "Assessment mode", value: "Adaptive", note: "Difficulty follows you", icon: Brain }, { label: "Questions ready", value: "24", note: "Across 3 weak topics", icon: Target }, { label: "Last accuracy", value: "76%", note: "+9% from last week", icon: CheckCircle2 }]} />; }

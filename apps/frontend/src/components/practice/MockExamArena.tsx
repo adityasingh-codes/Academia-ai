@@ -1,0 +1,3 @@
+import { Clock3, FileText, Trophy } from "lucide-react";
+import { WorkspaceView } from "../WorkspaceView";
+export default function MockExamArena() { return <WorkspaceView eyebrow="Exam simulation" title="Mock Exam Arena" description="Practice under realistic constraints with post-exam diagnostics that expose the concepts behind each lost mark." icon={Trophy} accent="amber" metrics={[{ label: "Next simulation", value: "48 min", note: "Physics mechanics", icon: Clock3 }, { label: "Question bank", value: "186", note: "Curated and tagged", icon: FileText }, { label: "Best percentile", value: "82nd", note: "Last 5 attempts", icon: Trophy }]} />; }

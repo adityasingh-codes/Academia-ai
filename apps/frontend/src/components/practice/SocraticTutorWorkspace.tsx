@@ -1,0 +1,3 @@
+import { Brain, Lightbulb, MessageCircle } from "lucide-react";
+import { WorkspaceView } from "../WorkspaceView";
+export default function SocraticTutorWorkspace() { return <WorkspaceView eyebrow="Guided reasoning" title="Socratic Tutor Workspace" description="Turn confusion into a sequence of better questions, hints, and explanations grounded in your study material." icon={Brain} accent="cyan" metrics={[{ label: "Active dialogue", value: "1", note: "Rotational motion", icon: MessageCircle }, { label: "Hints used", value: "3", note: "Keep reasoning yours", icon: Lightbulb }, { label: "Confidence shift", value: "+18%", note: "Since first prompt", icon: Brain }]} />; }

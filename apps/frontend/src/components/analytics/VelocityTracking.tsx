@@ -1,0 +1,3 @@
+import { BarChart3, Clock3, TrendingUp } from "lucide-react";
+import { WorkspaceView } from "../WorkspaceView";
+export default function VelocityTracking() { return <WorkspaceView eyebrow="Progress analytics" title="Velocity Tracking" description="Measure learning momentum by durable mastery, not by hours spent or pages completed." icon={TrendingUp} accent="emerald" metrics={[{ label: "Mastery velocity", value: "+4.8%", note: "Weekly average", icon: TrendingUp }, { label: "Focused minutes", value: "214", note: "This week", icon: Clock3 }, { label: "Topics closed", value: "11", note: "Last 30 days", icon: BarChart3 }]} />; }

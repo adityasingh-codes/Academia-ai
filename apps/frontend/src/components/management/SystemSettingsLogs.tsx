@@ -1,0 +1,3 @@
+import { CheckCircle2, Settings2, Target } from "lucide-react";
+import { WorkspaceView } from "../WorkspaceView";
+export default function SystemSettingsLogs() { return <WorkspaceView eyebrow="Control room" title="System Settings & Logs" description="Manage learning preferences, indexed material behavior, and a transparent record of system activity." icon={Settings2} accent="cyan" metrics={[{ label: "System health", value: "Good", note: "All services responding", icon: CheckCircle2 }, { label: "Indexed sources", value: "14", note: "Last sync today", icon: Target }, { label: "Preferences", value: "12", note: "Personalized settings", icon: Settings2 }]} />; }

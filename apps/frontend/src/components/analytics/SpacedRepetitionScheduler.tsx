@@ -1,0 +1,3 @@
+import { CalendarDays, CheckCircle2, Clock3 } from "lucide-react";
+import { WorkspaceView } from "../WorkspaceView";
+export default function SpacedRepetitionScheduler() { return <WorkspaceView eyebrow="Memory maintenance" title="Spaced Repetition Scheduler" description="Keep important concepts alive with review timing tuned to recall strength and forgetting risk." icon={CalendarDays} accent="amber" metrics={[{ label: "Due today", value: "8", note: "15 minutes estimated", icon: CalendarDays }, { label: "Recall rate", value: "84%", note: "Last 7 days", icon: CheckCircle2 }, { label: "Next review", value: "2h 18m", note: "Chain rule", icon: Clock3 }]} />; }
