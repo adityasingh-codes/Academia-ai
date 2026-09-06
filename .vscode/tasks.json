@@ -1,0 +1,20 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Watch project code bundle",
+      "type": "shell",
+      "command": "node scripts/watch_project.js",
+      "isBackground": true,
+      "runOptions": {
+        "runOn": "folderOpen"
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "never",
+        "panel": "dedicated",
+        "close": false
+      }
+    }
+  ]
+}

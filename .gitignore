@@ -27,11 +27,14 @@ dist/
 build/
 .next/
 .vite/
+project_code.txt
+project_structure.txt
 
 # IDE
 .vscode/*
 !.vscode/extensions.json
 !.vscode/settings.json
+!.vscode/tasks.json
 
 # OS
 .DS_Store
