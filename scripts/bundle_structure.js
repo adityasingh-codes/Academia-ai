@@ -1,43 +1,57 @@
 const fs = require("fs");
 const path = require("path");
 
-const root = path.resolve(__dirname, "..");
-const outputPath = path.join(root, "project_structure.txt");
-const excludedDirectories = new Set([
-  ".git", "node_modules", ".venv", "venv", "dist", "build", ".VSCodeCounter", "__pycache__",
+const projectRoot = path.resolve(__dirname, "..");
+const outputPath = path.join(projectRoot, "project_structure.txt");
+const excludedDirectoryNames = new Set([
+  ".git",
+  "node_modules",
+  ".venv",
+  "venv",
+  "dist",
+  "build",
+  "__pycache__",
+  ".VSCodeCounter",
 ]);
-const excludedFiles = new Set(["project_code.txt", "project_structure.txt"]);
+const excludedFileNames = new Set([
+  "project_code.txt",
+  "project_structure.txt",
+]);
 
-function collectTree(directory, prefix = "") {
-  if (!fs.existsSync(directory)) return [];
+function shouldSkip(entry) {
+  return entry.isDirectory()
+    ? excludedDirectoryNames.has(entry.name)
+    : excludedFileNames.has(entry.name);
+}
 
+function walkDirectory(directory, prefix = "") {
   const entries = fs.readdirSync(directory, { withFileTypes: true })
-    .filter((entry) => {
-      if (entry.isDirectory()) return !excludedDirectories.has(entry.name);
-      return !excludedFiles.has(entry.name);
-    })
+    .filter((entry) => !shouldSkip(entry))
     .sort((left, right) => {
-      if (left.isDirectory() !== right.isDirectory()) return left.isDirectory() ? -1 : 1;
+      if (left.isDirectory() !== right.isDirectory()) {
+        return left.isDirectory() ? -1 : 1;
+      }
       return left.name.localeCompare(right.name);
     });
 
-  const lines = [];
-  entries.forEach((entry, index) => {
+  return entries.flatMap((entry, index) => {
     const isLast = index === entries.length - 1;
-    const branch = isLast ? "`-- " : "|-- ";
+    const branch = isLast ? "└── " : "├── ";
     const entryPath = path.join(directory, entry.name);
-    lines.push(`${prefix}${branch}${entry.name}${entry.isDirectory() ? "/" : ""}`);
+    const lines = [`${prefix}${branch}${entry.name}${entry.isDirectory() ? "/" : ""}`];
+
     if (entry.isDirectory()) {
-      lines.push(...collectTree(entryPath, `${prefix}${isLast ? "    " : "|   "}`));
+      const childPrefix = `${prefix}${isLast ? "    " : "│   "}`;
+      lines.push(...walkDirectory(entryPath, childPrefix));
     }
+    return lines;
   });
-  return lines;
 }
 
 function buildStructure() {
-  const content = [path.basename(root) + "/", ...collectTree(root)].join("\n") + "\n";
-  fs.writeFileSync(outputPath, content, "utf8");
-  console.log(`[structure] Wrote project tree to ${path.relative(root, outputPath)}`);
+  const lines = [path.basename(projectRoot) + "/", ...walkDirectory(projectRoot)];
+  fs.writeFileSync(outputPath, `${lines.join("\n")}\n`, "utf8");
+  console.log(`[structure] Wrote ${lines.length - 1} entries to ${path.relative(projectRoot, outputPath)}`);
 }
 
 if (require.main === module) buildStructure();

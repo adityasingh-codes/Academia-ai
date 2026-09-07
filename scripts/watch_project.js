@@ -5,7 +5,7 @@ const { buildStructure } = require("./bundle_structure");
 
 const root = path.resolve(__dirname, "..");
 const excludedDirectories = new Set([
-  ".git", "node_modules", ".venv", "venv", "dist", "build", ".VSCodeCounter", "__pycache__",
+  ".git", "node_modules", ".venv", "venv", "dist", "build", ".VSCodeCounter", "__pycache__", ".DS_Store",
 ]);
 const generatedFiles = new Set(["project_code.txt", "project_structure.txt"]);
 let rebuildTimer;
