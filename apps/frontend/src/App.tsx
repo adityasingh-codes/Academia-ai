@@ -28,6 +28,20 @@ const views = {
   settings: SystemSettingsLogs,
 } as const;
 
+const viewAccents: Record<keyof typeof views, "indigo" | "emerald" | "amber" | "rose" | "cyan"> = {
+  dashboard: "indigo", assessment: "indigo", tutor: "cyan", "mock-exam": "amber",
+  "root-cause": "rose", "knowledge-graph": "cyan", velocity: "emerald",
+  "spaced-repetition": "amber", planner: "indigo", mistakes: "rose", settings: "cyan",
+};
+
+const ambientGlow: Record<"indigo" | "emerald" | "amber" | "rose" | "cyan", string> = {
+  indigo: "from-indigo-500/35 via-indigo-500/10 to-transparent dark:from-indigo-500/40 dark:via-indigo-500/10 dark:to-transparent",
+  emerald: "from-emerald-500/35 via-emerald-500/10 to-transparent dark:from-emerald-500/40 dark:via-emerald-500/10 dark:to-transparent",
+  amber: "from-amber-500/35 via-amber-500/10 to-transparent dark:from-amber-500/40 dark:via-amber-500/10 dark:to-transparent",
+  rose: "from-rose-500/35 via-rose-500/10 to-transparent dark:from-rose-500/40 dark:via-rose-500/10 dark:to-transparent",
+  cyan: "from-cyan-500/35 via-cyan-500/10 to-transparent dark:from-cyan-500/40 dark:via-cyan-500/10 dark:to-transparent",
+};
+
 type SearchResult = { id: string; label: string; category: "App Features & Pages" | "Subjects & Chapters"; tab?: keyof typeof views; detail?: string };
 
 const featureResults: SearchResult[] = [
@@ -88,10 +102,10 @@ function CommandPalette({ onClose, onNavigate }: { onClose: () => void; onNaviga
   };
 
   return <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/60 p-4 pt-20 backdrop-blur-sm" onMouseDown={onClose}>
-    <div className="w-full max-w-xl overflow-hidden rounded-xl border border-white/10 bg-[#0d121c] shadow-2xl shadow-black/50" onMouseDown={(event) => event.stopPropagation()}>
-      <div className="flex items-center gap-3 border-b border-white/10 px-4 py-3"><Search className="h-5 w-5 text-slate-500" /><input ref={inputRef} value={query} onChange={(event) => { setQuery(event.target.value); setSelectedIndex(0); }} onKeyDown={(event) => { if (event.key === "ArrowDown") { event.preventDefault(); setSelectedIndex((index) => Math.min(index + 1, Math.max(results.length - 1, 0))); } else if (event.key === "ArrowUp") { event.preventDefault(); setSelectedIndex((index) => Math.max(index - 1, 0)); } else if (event.key === "Enter") { event.preventDefault(); selectResult(results[selectedIndex]); } else if (event.key === "Escape") onClose(); }} placeholder="Search features, subjects, and chapters..." className="min-w-0 flex-1 bg-transparent text-sm text-white outline-none placeholder:text-slate-600" /><kbd className="hidden rounded border border-white/10 px-1.5 py-0.5 text-[10px] text-slate-500 sm:inline">ESC</kbd><button type="button" onClick={onClose} aria-label="Close search" className="rounded p-1 text-slate-500 hover:bg-white/[0.06] hover:text-slate-200"><X className="h-4 w-4" /></button></div>
-      <div className="max-h-[min(28rem,60vh)] overflow-y-auto p-2">{results.length === 0 ? <p className="px-3 py-10 text-center text-sm text-slate-500">No matching results</p> : (["App Features & Pages", "Subjects & Chapters"] as const).map((category) => { const categoryResults = results.filter((result) => result.category === category); if (!categoryResults.length) return null; return <section key={category}><h2 className="px-3 pb-1 pt-2 text-[10px] font-semibold uppercase tracking-widest text-slate-600">{category}</h2>{categoryResults.map((result) => { const index = results.indexOf(result); return <button key={result.id} type="button" onClick={() => selectResult(result)} className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left transition ${index === selectedIndex ? "bg-indigo-500/15 text-indigo-100" : "text-slate-300 hover:bg-white/[0.05]"}`}><BookOpen className="h-4 w-4 shrink-0 text-indigo-300" /><span className="min-w-0 flex-1 truncate text-sm">{result.label}<span className="ml-2 text-xs text-slate-600">{result.detail}</span></span>{index === selectedIndex && <CornerDownLeft className="h-3.5 w-3.5 text-slate-500" />}</button>; })}</section>; })}</div>
-      <div className="flex items-center justify-between border-t border-white/10 px-4 py-2 text-[10px] text-slate-600"><span>Navigate <ArrowUp className="mx-0.5 inline h-3 w-3" /><ArrowDown className="mx-0.5 inline h-3 w-3" /> Select <CornerDownLeft className="mx-0.5 inline h-3 w-3" /></span><span>Academia.ai search</span></div>
+    <div className="w-full max-w-xl overflow-hidden rounded-xl border border-slate-200 bg-white shadow-2xl shadow-slate-400/20 dark:border-slate-800 dark:bg-slate-900 dark:shadow-black/50" onMouseDown={(event) => event.stopPropagation()}>
+      <div className="flex items-center gap-3 border-b border-slate-200 px-4 py-3 dark:border-slate-800"><Search className="h-5 w-5 text-slate-500 dark:text-slate-400" /><input ref={inputRef} value={query} onChange={(event) => { setQuery(event.target.value); setSelectedIndex(0); }} onKeyDown={(event) => { if (event.key === "ArrowDown") { event.preventDefault(); setSelectedIndex((index) => Math.min(index + 1, Math.max(results.length - 1, 0))); } else if (event.key === "ArrowUp") { event.preventDefault(); setSelectedIndex((index) => Math.max(index - 1, 0)); } else if (event.key === "Enter") { event.preventDefault(); selectResult(results[selectedIndex]); } else if (event.key === "Escape") onClose(); }} placeholder="Search features, subjects, and chapters..." className="min-w-0 flex-1 bg-transparent text-sm text-slate-900 outline-none placeholder:text-slate-500 dark:text-slate-100 dark:placeholder:text-slate-600" /><kbd className="hidden rounded border border-slate-200 px-1.5 py-0.5 text-[10px] text-slate-500 dark:border-slate-700 sm:inline">ESC</kbd><button type="button" onClick={onClose} aria-label="Close search" className="rounded p-1 text-slate-500 hover:bg-slate-100 hover:text-slate-900 dark:hover:bg-slate-800 dark:hover:text-slate-200"><X className="h-4 w-4" /></button></div>
+      <div className="max-h-[min(28rem,60vh)] overflow-y-auto p-2">{results.length === 0 ? <p className="px-3 py-10 text-center text-sm text-slate-500">No matching results</p> : (["App Features & Pages", "Subjects & Chapters"] as const).map((category) => { const categoryResults = results.filter((result) => result.category === category); if (!categoryResults.length) return null; return <section key={category}><h2 className="px-3 pb-1 pt-2 text-[10px] font-semibold uppercase tracking-widest text-slate-600 dark:text-slate-400">{category}</h2>{categoryResults.map((result) => { const index = results.indexOf(result); return <button key={result.id} type="button" onClick={() => selectResult(result)} className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left transition ${index === selectedIndex ? "bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300" : "text-slate-700 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"}`}><BookOpen className="h-4 w-4 shrink-0 text-indigo-600 dark:text-indigo-300" /><span className="min-w-0 flex-1 truncate text-sm">{result.label}<span className="ml-2 text-xs text-slate-500 dark:text-slate-400">{result.detail}</span></span>{index === selectedIndex && <CornerDownLeft className="h-3.5 w-3.5 text-slate-500 dark:text-slate-400" />}</button>; })}</section>; })}</div>
+      <div className="flex items-center justify-between border-t border-slate-200 px-4 py-2 text-[10px] text-slate-500 dark:border-slate-800 dark:text-slate-500"><span>Navigate <ArrowUp className="mx-0.5 inline h-3 w-3" /><ArrowDown className="mx-0.5 inline h-3 w-3" /> Select <CornerDownLeft className="mx-0.5 inline h-3 w-3" /></span><span>Academia.ai search</span></div>
     </div>
   </div>;
 }
@@ -100,7 +114,13 @@ export function App() {
   const [activeTab, setActiveTab] = useState<keyof typeof views>("dashboard");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [darkMode, setDarkMode] = useState(() => window.localStorage.getItem("theme") !== "light");
   const ActiveView = views[activeTab] ?? StudentDashboard;
+
+  useEffect(() => {
+    document.documentElement.classList.toggle("dark", darkMode);
+    window.localStorage.setItem("theme", darkMode ? "dark" : "light");
+  }, [darkMode]);
 
   useEffect(() => {
     const handleShortcut = (event: KeyboardEvent) => {
@@ -113,9 +133,12 @@ export function App() {
     return () => window.removeEventListener("keydown", handleShortcut);
   }, []);
 
-  return <div className="flex min-h-screen bg-[#080c14]">
-    <SidebarDrawer activeTab={activeTab} collapsed={sidebarCollapsed} onToggle={() => setSidebarCollapsed((collapsed) => !collapsed)} onSearch={() => setSearchOpen(true)} onNavigate={(tab) => { if (tab in views) setActiveTab(tab as keyof typeof views); }} />
-    <div className="min-w-0 flex-1 transition-all duration-300 ease-in-out"><ActiveView /></div>
+  const currentAccent = viewAccents[activeTab] ?? "indigo";
+
+  return <div className="relative flex min-h-screen w-full overflow-hidden bg-[#F1F5F9] transition-colors duration-500 ease-in-out dark:bg-[#0b0c10]">
+    <div className={`pointer-events-none absolute -top-32 -left-32 h-[650px] w-[650px] bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] ${ambientGlow[currentAccent]} blur-3xl transition-all duration-700 z-0`} />
+    <SidebarDrawer activeTab={activeTab} accent={currentAccent} collapsed={sidebarCollapsed} darkMode={darkMode} onToggle={() => setSidebarCollapsed((collapsed) => !collapsed)} onSearch={() => setSearchOpen(true)} onThemeToggle={() => setDarkMode((enabled) => !enabled)} onNavigate={(tab) => { if (tab in views) setActiveTab(tab as keyof typeof views); }} />
+    <div className="relative z-10 min-w-0 flex-1 transition-all duration-300 ease-in-out"><ActiveView /></div>
     {searchOpen && <CommandPalette onClose={() => setSearchOpen(false)} onNavigate={setActiveTab} />}
   </div>;
 }
